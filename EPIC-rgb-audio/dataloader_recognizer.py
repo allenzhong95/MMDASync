@@ -11,9 +11,9 @@ import random
 
 class EPICDOMAINRecognizer(torch.utils.data.Dataset):
     def __init__(self, split='train', source_domain='D1', target_domain='D2', modality='rgb', cfg=None, use_audio=True):
-        self.base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/'
-        source_train_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/'+source_domain+"_"+split+".pkl")
-        target_train_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/'+target_domain+"_"+split+".pkl")
+        self.base_path = '/kaggle/working/'
+        source_train_file = pd.read_pickle('/kaggle/working/pkl/'+source_domain+"_"+split+".pkl")
+        target_train_file = pd.read_pickle('/kaggle/working/pkl/'+target_domain+"_"+split+".pkl")
 
         self.source_domain = source_domain
         self.target_domain = target_domain
@@ -152,8 +152,8 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
 
 class EPICDOMAIN(torch.utils.data.Dataset):
     def __init__(self, split='train', domain='D1', modality='rgb', cfg=None, use_audio=True):
-        self.base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/'
-        train_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/'+domain+"_"+split+".pkl")
+        self.base_path = '/kaggle/working/'
+        train_file = pd.read_pickle('/kaggle/working/pkl/'+domain+"_"+split+".pkl")
         self.domain = domain
         self.split = split
         self.modality = modality

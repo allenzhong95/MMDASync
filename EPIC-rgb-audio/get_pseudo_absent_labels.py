@@ -45,8 +45,8 @@ audio_cls_model.load_state_dict(checkpoint['audio_state_dict'])
 audio_cls_model = audio_cls_model.cuda()
 audio_cls_model.eval()
 
-base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/'
-test_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/' + args.target_domain + "_train.pkl")
+base_path = '/kaggle/working/'
+test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_train.pkl")
 
 
 data1 = []

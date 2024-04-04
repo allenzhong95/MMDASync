@@ -23,8 +23,10 @@ if __name__ == '__main__':
     torch.manual_seed(0)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--source_domain', type=str, help='input a str', default='D2')
+    parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
     parser.add_argument('--target_domain', type=str, help='input a str', default='D3')
+    parser.add_argument('--pkl_path', type=str, help='input a str',
+        default='/kaggle/input/mmdomainadaptation/pytorch/mmda/2/Annotations/Annotations')
 
     args = parser.parse_args()
 

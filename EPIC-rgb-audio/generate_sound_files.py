@@ -27,8 +27,8 @@ split_list = ['train', 'test']
 domain_list = ['D1', 'D2', 'D3']
 for domain in domain_list:
     for split in split_list:
-        source_path = '/home/xxx/data/EPIC_KITCHENS_UDA/Videos/'+split+'/'+domain
-        output_path = '/home/xxx/data/EPIC_KITCHENS_UDA/AudioVGGSound/'
+        source_path = '/kaggle/working/Videos/'+split+'/'+domain
+        output_path = '/kaggle/working/AudioVGGSound/'
         if not os.path.exists(output_path):
             os.mkdir(output_path)
         output_path = output_path + split

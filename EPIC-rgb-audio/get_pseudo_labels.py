@@ -23,7 +23,7 @@ parser.add_argument('--target_domain', type=str, help='input a str', default='D2
 args = parser.parse_args()
 
 config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb.py'
-checkpoint_file = '/home/xxx/data/mmaction2_models/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
 # assign the desired device.
 device = 'cuda:0'  # or 'cpu'
