@@ -53,7 +53,7 @@ audio_model.eval()
 
 
 
-base_path = '/kaggle/working/rgb/'
+base_path = '/kaggle/working/frames_rgb_flow/rgb/'
 test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_train.pkl")
 test_pipeline = cfg.data.test.pipeline
 test_pipeline = Compose(test_pipeline)
