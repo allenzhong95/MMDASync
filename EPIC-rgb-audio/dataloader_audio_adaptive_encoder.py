@@ -20,7 +20,8 @@ class EPICDOMAINClusters(torch.utils.data.Dataset):
         self.interval = 9
 
         cls_wise_data = []
-        cluster_num = np.load('audio_clusters/'+source_domain+'/cluster_num.npy')
+#         cluster_num = np.load('audio_clusters/'+source_domain+'/cluster_num.npy')
+        cluster_num = np.load(source_domain+'_audio_clusters'+'/cluster_num.npy')
         new_label_map = []
         count = 0
         for ii in range(8):
