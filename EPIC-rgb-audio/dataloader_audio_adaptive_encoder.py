@@ -49,7 +49,7 @@ class EPICDOMAINClusters(torch.utils.data.Dataset):
             num_per_cls[int(labels)] += 1
             video_id = image[0].split("/")[-1]
             start_index = int(np.ceil(image[1] / 2))
-            cluster_id = np.load("audio_clusters/"+source_domain+'/%02d/'%int(labels) + video_id + "_%010d.npy"%start_index)[0]
+            cluster_id = np.load(source_domain+"_audio_clusters/"+'/%02d/'%int(labels) + video_id + "_%010d.npy"%start_index)[0]
             data1.append([image[0], image[1], image[2], image[3], image[4], int(labels), new_label_map[int(labels)][cluster_id], cluster_id])
             cls_wise_data[int(labels)][cluster_id].append([image[0], image[1], image[2], image[3], image[4], int(labels)])
 
