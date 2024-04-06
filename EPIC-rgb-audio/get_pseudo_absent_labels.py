@@ -1,6 +1,7 @@
 from mmaction.apis import init_recognizer, inference_recognizer
 import torch
-from data_loader_epic import EPICDOMAIN
+# from data_loader_epic import EPICDOMAIN
+from dataloader_audio_adaptive_encoder import EPICDOMAIN
 import argparse
 import tqdm
 import os
