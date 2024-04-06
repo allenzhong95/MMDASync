@@ -177,7 +177,8 @@ class EPICDOMAINClusters(torch.utils.data.Dataset):
             start_index = int(np.ceil(self.target_samples[index2][1] / 2))
             video_id = self.target_samples[index2][0].split("/")[-1]
             audio_predict = np.load(
-                "audio_preds/%s2%s/" % (self.source_domain, self.target_domain) + video_id + "_%010d.npy" % start_index)
+                "%s2%s_audio_train/" % (self.source_domain, self.target_domain) + video_id + "_%010d.npy" % start_index)
+            #     "audio_preds/%s2%s/" % (self.source_domain, self.target_domain) + video_id + "_%010d.npy" % start_index)
             idx_list = np.argsort(audio_predict)
             idx_list = idx_list[:3]
             target_label = np.zeros((8,))
