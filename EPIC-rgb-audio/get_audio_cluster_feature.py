@@ -11,7 +11,7 @@ parser.add_argument('--source_domain', type=str, help='input a str', default='D1
 parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
 args = parser.parse_args()
 
-test_file = pd.read_pickle('/kaggle/working/pkl/' + args.domain + "_train.pkl")
+test_file = pd.read_pickle('/kaggle/working/pkl/' + args.source_domain + "_train.pkl")
 feature_wise_data = []
 for ii in range(8):
     feature_wise_data.append([])
