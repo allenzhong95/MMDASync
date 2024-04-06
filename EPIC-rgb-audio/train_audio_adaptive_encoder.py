@@ -138,7 +138,8 @@ if __name__ == '__main__':
 
     criterion = nn.CrossEntropyLoss(reduce=False)#nn.BCEWithLogitsLoss()
     criterion = criterion.cuda()
-    batch_size = 16
+    # batch_size = 16
+    batch_size = 8
 
     optim = torch.optim.Adam(list(model.module.backbone.fast_path.layer4.parameters()) + list(
         model.module.backbone.slow_path.layer4.parameters()) +list(model.module.cls_head.parameters()) + list(attention_model.parameters()), lr=opts.lr_1stStage, weight_decay=1e-4)
