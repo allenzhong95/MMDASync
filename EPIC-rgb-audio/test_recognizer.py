@@ -33,7 +33,7 @@ parser.add_argument('--emb_dropout', type=float, help='input a str', default=0.1
 args = parser.parse_args()
 
 config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb2.py'
-checkpoint_file = '/home/xxx/data/mmaction2_models/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
 # assign the desired device.
 device = 'cuda:0'  # or 'cpu'
@@ -76,8 +76,8 @@ checkpoint = torch.load("checkpoints/best_%s2%s_slow_flow_transformer_cls.pt" % 
 recognizer.load_state_dict(checkpoint['adapter_state_dict'])
 recognizer.eval()
 
-base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/'
-test_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/' + args.target_domain + "_test.pkl")
+base_path = '/kaggle/working/'
+test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_test.pkl")
 test_pipeline = cfg.data.test.pipeline
 test_pipeline = Compose(test_pipeline)
 

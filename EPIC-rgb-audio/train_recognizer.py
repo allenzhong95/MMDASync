@@ -199,7 +199,7 @@ if __name__ == '__main__':
     # checkpoint_file = 'ircsn_ig65m_pretrained_bnfrozen_r152_32x2x1_58e_kinetics400_rgb_20200812-9037a758.pth'
 
     config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb2.py'
-    checkpoint_file = '/home/xxx/data/mmaction2_models/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+    checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
     # assign the desired device.
     device = 'cuda:0' # or 'cpu'
     device = torch.device(device)

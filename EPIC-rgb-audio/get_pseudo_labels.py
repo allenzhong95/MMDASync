@@ -53,8 +53,8 @@ audio_model.eval()
 
 
 
-base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/frames_rgb_flow/rgb/'
-test_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/' + args.target_domain + "_train.pkl")
+base_path = '/kaggle/working/rgb/'
+test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_train.pkl")
 test_pipeline = cfg.data.test.pipeline
 test_pipeline = Compose(test_pipeline)
 
@@ -97,7 +97,7 @@ for i, sample1 in enumerate(data1):
     data = test_pipeline(data)
     clip = data['imgs'].cuda()
 
-    audio_path ='/home/xxx/data/EPIC_KITCHENS_UDA/AudioVGGSound/train/' + sample1[0] + '.wav'
+    audio_path ='/kaggle/working/AudioVGGSound/train/' + sample1[0] + '.wav'
     samples, samplerate = sf.read(audio_path)
 
     duration = len(samples) / samplerate

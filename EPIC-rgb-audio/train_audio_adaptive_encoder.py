@@ -98,7 +98,7 @@ if __name__ == '__main__':
     opts = config_func(args.source_domain, args.target_domain)
 
     config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb.py'
-    checkpoint_file = '/home/xxx/data/mmaction2_models/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+    checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
     # assign the desired device.
     device = 'cuda:0' # or 'cpu'

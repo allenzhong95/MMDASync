@@ -8,8 +8,8 @@ parser.add_argument('--source_domain', type=str, help='input a str', default='D3
 parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
 args = parser.parse_args()
 
-base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/frames_rgb_flow/flow/'
-test_file = pd.read_pickle(args.target_domain + "_test.pkl")
+base_path = '/kaggle/working/flow/'
+test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_test.pkl")
 
 
 data1 = []

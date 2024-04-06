@@ -23,7 +23,7 @@ parser.add_argument('--target_domain', type=str, help='input a str', default='D2
 args = parser.parse_args()
 
 config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb.py'
-checkpoint_file = '/home/xxx/data/mmaction2_models/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
 # assign the desired device.
 device = 'cuda:0'  # or 'cpu'
@@ -54,8 +54,8 @@ audio_model.eval()
 
 
 
-base_path = '/home/xxx/data/EPIC_KITCHENS_UDA/frames_rgb_flow/rgb/'
-test_file = pd.read_pickle('/home/xxx/data/EPIC_KITCHENS_UDA/' + args.target_domain + "_test.pkl")
+base_path = '/kaggle/working/rgb/'
+test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_test.pkl")
 test_pipeline = cfg.data.test.pipeline
 test_pipeline = Compose(test_pipeline)
 
@@ -98,7 +98,7 @@ for i, sample1 in enumerate(data1):
     data = test_pipeline(data)
     clip = data['imgs'].cuda()
 
-    audio_path ='/home/xxx/data/EPIC_KITCHENS_UDA/AudioVGGSound/test/' + sample1[0] + '.wav'
+    audio_path ='/kaggle/working/AudioVGGSound/test/' + sample1[0] + '.wav'
     samples, samplerate = sf.read(audio_path)
 
     duration = len(samples) / samplerate
