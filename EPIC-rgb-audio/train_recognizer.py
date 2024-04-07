@@ -255,7 +255,7 @@ if __name__ == '__main__':
     optim = torch.optim.Adam(list(recognizer.parameters()), lr=lr, weight_decay=1e-4)
     scheduler = lr_scheduler.StepLR(optim, step_size=3, gamma=0.1)
     # train_dataset = EPICDOMAINAdapter(split='train', source_domain=args.source_domain, target_domain=args.target_domain,modality='rgb', cfg=cfg)
-    train_dataset = EPICDOMAIN(split='train', source_domain=args.source_domain, target_domain=args.target_domain,modality='rgb', cfg=cfg)
+    train_dataset = EPICDOMAINRecognizer(split='train', source_domain=args.source_domain, target_domain=args.target_domain,modality='rgb', cfg=cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=3, shuffle=True,
                                                    pin_memory=(device.type == "cuda"), drop_last=True)
