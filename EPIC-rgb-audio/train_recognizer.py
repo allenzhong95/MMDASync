@@ -230,7 +230,7 @@ if __name__ == '__main__':
     audio_cls_model = AudioAttGenModule()
     audio_cls_model.fc = nn.Linear(512, 8)
     audio_cls_model = audio_cls_model.cuda()
-    checkpoint = torch.load("checkpoints/best_%s2%s_audio.pt")
+    checkpoint = torch.load("checkpoints/best_%s2%s_audio.pt" % (args.source_domain, args.target_domain))
     audio_cls_model.load_state_dict(checkpoint['audio_state_dict'])
     audio_cls_model = torch.nn.DataParallel(audio_cls_model)
     audio_cls_model.eval()
