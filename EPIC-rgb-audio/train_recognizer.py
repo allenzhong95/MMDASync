@@ -193,6 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
     parser.add_argument('--lr', type=float, help='input a str', default=7e-4)
     parser.add_argument('--depth', type=int, help='input a str', default=2)
+    parser.add_argument('--epoch', type=int, help='input a epoch', default=4)
     args = parser.parse_args()
     # config_file = 'configs/recognition/csn/ircsn_ig65m_pretrained_bnfrozen_r152_32x2x1_58e_kinetics400_rgb.py'
     # # download the checkpoint from model zoo and put it in `checkpoints/`
@@ -268,7 +269,7 @@ if __name__ == '__main__':
     BestAcc = 0
     iter = 0
     with open(log_path, "a") as f:
-        for epoch_i in range(29):
+        for epoch_i in range(args.epoch):
             print("Epoch: %02d" % epoch_i)
             for split in ['train','val']:
                 acc = 0
