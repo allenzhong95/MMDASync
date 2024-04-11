@@ -9,6 +9,7 @@ import math
 import csv
 import collections
 import torch.nn as nn
+import ipdb
 from torch.optim import lr_scheduler
 from VGGSound.model import AVENet
 from VGGSound.models.resnet import AudioAttGenModule
@@ -25,10 +26,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
     parser.add_argument('--target_domain', type=str, help='input a str', default='D3')
-    parser.add_argument('--pkl_path', type=str, help='input a str',
-        default='/kaggle/input/mmdomainadaptation/pytorch/mmda/2/Annotations/Annotations')
+    parser.add_argument('--debug', type=str, help='input a str', default='False')
 
     args = parser.parse_args()
+    if args.debug != 'False':
+        ipdb.set_trace() 
 
     # assign the desired device.
     device = 'cuda:0' # or 'cpu'
