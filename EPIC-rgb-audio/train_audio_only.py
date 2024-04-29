@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
     parser.add_argument('--target_domain', type=str, help='input a str', default='D3')
+    parser.add_argument('--device', type=str, help='input a str', default='cpu')
     parser.add_argument('--debug', type=str, help='input a str', default='False')
 
     args = parser.parse_args()
@@ -33,7 +34,8 @@ if __name__ == '__main__':
         ipdb.set_trace() 
 
     # assign the desired device.
-    device = 'cuda:0' # or 'cpu'
+    # device = 'cuda:0' # or 'cpu'
+    device = args.device
     device = torch.device(device)
 
     audio_args = get_arguments()
