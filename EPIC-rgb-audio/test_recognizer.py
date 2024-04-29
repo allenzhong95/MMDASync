@@ -41,7 +41,8 @@ device = args.device  # or 'cpu'
 device = torch.device(device)
 
 model = init_recognizer(config_file, checkpoint_file, device=device, use_frames=True)
-model.cls_head.fc_cls = nn.Linear(2304, 8).cuda()
+if args.device != 'cpu':
+    model.cls_head.fc_cls = nn.Linear(2304, 8).cuda()
 cfg = model.cfg
 model = torch.nn.DataParallel(model)
 checkpoint = torch.load("checkpoints/best_%s2%s_2ndStage.pt" % (args.source_domain, args.target_domain), map_location=device)
@@ -49,7 +50,8 @@ model.load_state_dict(checkpoint['state_dict'])
 model.eval()
 
 attention_model = ViT(dim=256, depth=8, heads=8, mlp_dim=512, dropout=0.15, emb_dropout=0.1, dim_head=64)
-attention_model = attention_model.cuda()
+if args.device != 'cpu':
+    attention_model = attention_model.cuda()
 attention_model = torch.nn.DataParallel(attention_model)
 attention_model.load_state_dict(checkpoint['audio_state_dict'])
 attention_model.eval()
@@ -58,20 +60,23 @@ audio_args = get_arguments()
 audio_model = AVENet(audio_args)
 checkpoint = torch.load("vggsound_avgpool.pth.tar")
 audio_model.load_state_dict(checkpoint['model_state_dict'])
-audio_model = audio_model.cuda()
+if args.device != 'cpu':
+    audio_model = audio_model.cuda()
 audio_model = torch.nn.DataParallel(audio_model)
 audio_model.eval()
 
 audio_cls_model = AudioAttGenModule()
 audio_cls_model.fc = nn.Linear(512, 8)
-audio_cls_model = audio_cls_model.cuda()
+if args.device != 'cpu':
+    audio_cls_model = audio_cls_model.cuda()
 checkpoint = torch.load("checkpoints/best_%s2%s_audio.pt")
 audio_cls_model.load_state_dict(checkpoint['audio_state_dict'])
 audio_cls_model = torch.nn.DataParallel(audio_cls_model)
 audio_cls_model.eval()
 
 recognizer = Recognizer()
-recognizer = recognizer.cuda()
+if args.device != 'cpu':
+    recognizer = recognizer.cuda()
 recognizer = torch.nn.DataParallel(recognizer)
 checkpoint = torch.load("checkpoints/best_%s2%s_slow_flow_transformer_cls.pt" % (args.source_domain, args.target_domain,))
 recognizer.load_state_dict(checkpoint['adapter_state_dict'])
@@ -113,7 +118,8 @@ for i, sample1 in enumerate(data1):
         filename_tmpl=filename_tmpl,
         modality=modality)
     data = test_pipeline(data)
-    clip = data['imgs'].cuda()
+    if args.device != 'cpu':
+        clip = data['imgs'].cuda()
 
     audio_path = base_path + 'AudioVGGSound/test/' +sample1[0] + '.wav'
     samples, samplerate = sf.read(audio_path)
@@ -150,7 +156,8 @@ for i, sample1 in enumerate(data1):
     mean = np.mean(spectrogram)
     std = np.std(spectrogram)
     spectrogram = np.divide(spectrogram - mean, std + 1e-9)
-    spectrogram = torch.Tensor(spectrogram).type(torch.FloatTensor).unsqueeze(0).unsqueeze(0).cuda()
+    if args.device != 'cpu':
+        spectrogram = torch.Tensor(spectrogram).type(torch.FloatTensor).unsqueeze(0).unsqueeze(0).cuda()
 
 
     with torch.no_grad():
