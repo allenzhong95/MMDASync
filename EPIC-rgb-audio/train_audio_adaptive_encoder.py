@@ -94,6 +94,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
     parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
+    parser.add_argument('--device', type=str, help='input a str', default='cpu')
     args = parser.parse_args()
     opts = config_func(args.source_domain, args.target_domain)
 
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
     # assign the desired device.
-    device = 'cuda:0' # or 'cpu'
+    device = args.device  # or 'cpu'
     device = torch.device(device)
 
      # build the model from a config file and a checkpoint file
@@ -112,7 +113,7 @@ if __name__ == '__main__':
 
     audio_args = get_arguments()
     audio_model = AVENet(audio_args)
-    checkpoint = torch.load("vggsound_avgpool.pth.tar")
+    checkpoint = torch.load("vggsound_avgpool.pth.tar", map_location=device)
     audio_model.load_state_dict(checkpoint['model_state_dict'])
     audio_model = audio_model.cuda()
     audio_model = torch.nn.DataParallel(audio_model)

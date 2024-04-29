@@ -194,6 +194,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, help='input a str', default=7e-4)
     parser.add_argument('--depth', type=int, help='input a str', default=2)
     parser.add_argument('--epoch', type=int, help='input a epoch', default=4)
+    parser.add_argument('--device', type=str, help='input a str', default='cpu')
     args = parser.parse_args()
     # config_file = 'configs/recognition/csn/ircsn_ig65m_pretrained_bnfrozen_r152_32x2x1_58e_kinetics400_rgb.py'
     # # download the checkpoint from model zoo and put it in `checkpoints/`
@@ -202,7 +203,7 @@ if __name__ == '__main__':
     config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb2.py'
     checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
     # assign the desired device.
-    device = 'cuda:0' # or 'cpu'
+    device = args.device # or 'cpu'
     device = torch.device(device)
 
     # build the model from a config file and a checkpoint file
@@ -210,7 +211,7 @@ if __name__ == '__main__':
     model.cls_head.fc_cls = nn.Linear(2304, 8).cuda()
     cfg = model.cfg
     model = torch.nn.DataParallel(model)
-    checkpoint = torch.load("checkpoints/best_%s2%s_1stStage.pt" % (args.source_domain, args.target_domain))
+    checkpoint = torch.load("checkpoints/best_%s2%s_1stStage.pt" % (args.source_domain, args.target_domain), map_location=device)
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
 
@@ -222,7 +223,7 @@ if __name__ == '__main__':
 
     audio_args = get_arguments()
     audio_model = AVENet(audio_args)
-    checkpoint = torch.load("vggsound_avgpool.pth.tar")
+    checkpoint = torch.load("vggsound_avgpool.pth.tar", map_location=device)
     audio_model.load_state_dict(checkpoint['model_state_dict'])
     audio_model = audio_model.cuda()
     audio_model = torch.nn.DataParallel(audio_model)

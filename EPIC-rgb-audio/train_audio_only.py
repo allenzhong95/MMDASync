@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     audio_args = get_arguments()
     audio_model = AVENet(audio_args)
-    checkpoint = torch.load("vggsound_avgpool.pth.tar")
+    checkpoint = torch.load("vggsound_avgpool.pth.tar", map_location=device)
     audio_model.load_state_dict(checkpoint['model_state_dict'])
     audio_model = audio_model.cuda()
     audio_model.eval()

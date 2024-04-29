@@ -20,13 +20,14 @@ torch.backends.cudnn.benchmark = False
 parser = argparse.ArgumentParser()
 parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
 parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
+parser.add_argument('--device', type=str, help='input a str', default='cpu')
 args = parser.parse_args()
 
 config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb.py'
 checkpoint_file = '/kaggle/working/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
 # assign the desired device.
-device = 'cuda:0'  # or 'cpu'
+device = args.device  # or 'cpu'
 device = torch.device(device)
 
 # build the model from a config file and a checkpoint file
@@ -34,7 +35,7 @@ model = init_recognizer(config_file, checkpoint_file, device=device, use_frames=
 model.cls_head.fc_cls = nn.Linear(2304, 8).cuda()
 cfg = model.cfg
 model = torch.nn.DataParallel(model)
-checkpoint = torch.load("checkpoints/best_%s2%s_1stStage.pt"%(args.source_domain, args.target_domain))
+checkpoint = torch.load("checkpoints/best_%s2%s_1stStage.pt"%(args.source_domain, args.target_domain), map_location=device)
 model.load_state_dict(checkpoint['state_dict'])
 model.eval()
 
