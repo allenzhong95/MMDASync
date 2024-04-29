@@ -42,13 +42,15 @@ if __name__ == '__main__':
     audio_model = AVENet(audio_args)
     checkpoint = torch.load("vggsound_avgpool.pth.tar", map_location=device)
     audio_model.load_state_dict(checkpoint['model_state_dict'])
-    audio_model = audio_model.cuda()
+    if args.device != 'cpu':
+        audio_model = audio_model.cuda()
     audio_model.eval()
 
     audio_cls_model = AudioAttGenModule()
     audio_cls_model.load_state_dict(checkpoint['model_state_dict'], strict=False)
     audio_cls_model.fc = nn.Linear(512, 8)
-    audio_cls_model = audio_cls_model.cuda()
+    if args.device != 'cpu':
+        audio_cls_model = audio_cls_model.cuda()
 
     base_path = "checkpoints/"
     if not os.path.exists(base_path):
@@ -59,7 +61,8 @@ if __name__ == '__main__':
     os.system(' '.join(cmd))
 
     criterion = nn.CrossEntropyLoss()#nn.BCEWithLogitsLoss()
-    criterion = criterion.cuda()
+    if args.device != 'cpu':
+        criterion = criterion.cuda()
     batch_size = 16
     lr = 1e-2#5e-4
 
@@ -88,8 +91,9 @@ if __name__ == '__main__':
                 #model.train(split=='train')
                 with tqdm.tqdm(total=len(dataloaders[split])) as pbar:
                     for (i, (spectrogram, labels)) in enumerate(dataloaders[split]):
-                        labels = labels.cuda()
-                        spectrogram = spectrogram.unsqueeze(1).cuda()
+                        if args.device != 'cpu':
+                            labels = labels.cuda()
+                            spectrogram = spectrogram.unsqueeze(1).cuda()
 
                         with torch.no_grad():
                             _, audio_feat, _ = audio_model(spectrogram)
