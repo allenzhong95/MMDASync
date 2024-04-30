@@ -18,47 +18,55 @@ from VGGSound.models.resnet import AudioAttGenModule
 from VGGSound.test import get_arguments
 import soundfile as sf
 from scipy import signal
+import config
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
+glob_para = config.GlobalPara()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
-parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
+parser.add_argument('--source_domain', type=str, default='D1')
+parser.add_argument('--target_domain', type=str, default='D2')
 args = parser.parse_args()
 
 
 # assign the desired device.
-device = 'cuda:0'  # or 'cpu'
+device = glob_para.device  # or 'cpu'
 device = torch.device(device)
 
 audio_args = get_arguments()
 audio_model = AVENet(audio_args)
-checkpoint = torch.load("vggsound_avgpool.pth.tar")
+checkpoint = torch.load("vggsound_avgpool.pth.tar", map_location=device)
 audio_model.load_state_dict(checkpoint['model_state_dict'])
-audio_model = audio_model.cuda()
+if glob_para != 'cpu':
+    audio_model = audio_model.cuda()
 audio_model.eval()
 
 audio_cls_model = AudioAttGenModule()
 audio_cls_model.fc = nn.Linear(512, 8)
-checkpoint = torch.load("checkpoints/best_%s2%s_audio.pt"%(args.source_domain, args.target_domain))
+checkpoint = torch.load("checkpoints/best_%s2%s_audio.pt" % (
+    args.source_domain, args.target_domain))
 audio_cls_model.load_state_dict(checkpoint['audio_state_dict'])
-audio_cls_model = audio_cls_model.cuda()
+if glob_para != 'cpu':
+    audio_cls_model = audio_cls_model.cuda()
 audio_cls_model.eval()
 
-base_path = '/kaggle/working/'
-test_file = pd.read_pickle('/kaggle/working/pkl/' + args.target_domain + "_train.pkl")
+base_path = glob_para.base_path
+test_file = pd.read_pickle(
+    glob_para.pkl_path + args.target_domain + "_train.pkl")
 
 
 data1 = []
 class_dict = {}
 for _, line in test_file.iterrows():
-    image = [args.target_domain + '/' + line['video_id'], line['start_frame'], line['stop_frame'], line['start_timestamp'],
+    image = [args.target_domain + '/' + line['video_id'], line['start_frame'],
+             line['stop_frame'], line['start_timestamp'],
              line['stop_timestamp']]
     labels = line['verb_class']
     # one_hot = np.zeros(8)
     # one_hot[labels] = 1.0
-    data1.append((image[0], image[1], image[2], image[3], image[4], int(labels)))
+    data1.append(
+        (image[0], image[1], image[2], image[3], image[4], int(labels)))
     if line['verb'] not in list(class_dict.keys()):
         class_dict[line['verb']] = line['verb_class']
 
@@ -70,7 +78,7 @@ for i, sample1 in enumerate(data1):
     label1 = sample1[-1]
     start_index = int(np.ceil(sample1[1] / 2))
 
-    audio_path = base_path + 'AudioVGGSound/train/' +sample1[0] + '.wav'
+    audio_path = base_path + 'AudioVGGSound/train/' + sample1[0] + '.wav'
     samples, samplerate = sf.read(audio_path)
 
     duration = len(samples) / samplerate
@@ -99,18 +107,21 @@ for i, sample1 in enumerate(data1):
 
     resamples[resamples > 1.] = 1.
     resamples[resamples < -1.] = -1.
-    frequencies, times, spectrogram = signal.spectrogram(resamples, samplerate, nperseg=512, noverlap=353)
+    frequencies, times, spectrogram = signal.spectrogram(
+        resamples, samplerate, nperseg=512, noverlap=353)
     spectrogram = np.log(spectrogram + 1e-7)
 
     mean = np.mean(spectrogram)
     std = np.std(spectrogram)
     spectrogram = np.divide(spectrogram - mean, std + 1e-9)
-    spectrogram = torch.Tensor(spectrogram).type(torch.FloatTensor).unsqueeze(0).unsqueeze(0).cuda()
+    if glob_para != 'cpu':
+        spectrogram = torch.Tensor(spectrogram).type(
+            torch.FloatTensor).unsqueeze(0).unsqueeze(0).cuda()
 
     predict_list = []
     with torch.no_grad():
         _, audio_feat, _ = audio_model(spectrogram)
-        audio_predict,_ = audio_cls_model(audio_feat.detach())
+        audio_predict, _ = audio_cls_model(audio_feat.detach())
 
         predict1 = torch.softmax(audio_predict, dim=1)
 
@@ -120,7 +131,5 @@ for i, sample1 in enumerate(data1):
         acc += 1
     print(i, acc / (i+1), len(data1))
     video_id = sample1[0].split("/")[-1]
-    np.save(save_path+video_id + "_%010d.npy"%start_index, predict1)
-
+    np.save(save_path+video_id + "_%010d.npy" % start_index, predict1)
 print(acc/len(data1))
-

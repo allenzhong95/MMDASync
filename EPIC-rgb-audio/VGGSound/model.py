@@ -3,9 +3,9 @@ from torch import nn
 import torch.nn.functional as F
 from VGGSound.models import resnet
 
-class AVENet(nn.Module):
 
-    def __init__(self,args):
+class AVENet(nn.Module):
+    def __init__(self, args):
         super(AVENet, self).__init__()
         self.audnet = Resnet(args)
 
@@ -15,7 +15,6 @@ class AVENet(nn.Module):
 
 
 def Resnet(opt):
-
     assert opt.model_depth in [10, 18, 34, 50, 101, 152, 200]
 
     if opt.model_depth == 10:
@@ -42,5 +41,4 @@ def Resnet(opt):
     elif opt.model_depth == 200:
         model = resnet.resnet200(
             num_classes=opt.n_classes)
-    return model 
-
+    return model

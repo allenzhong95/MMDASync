@@ -16,36 +16,42 @@ from VGGSound.models.resnet import AudioAttGenModule
 from VGGSound.test import get_arguments
 import soundfile as sf
 from scipy import signal
+import config
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
+glob_para = config.GlobalPara()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--source_domain', type=str, help='input a str', default='D1')
-parser.add_argument('--target_domain', type=str, help='input a str', default='D2')
+parser.add_argument('--source_domain', type=str, default='D2')
+parser.add_argument('--target_domain', type=str, default='D3')
 args = parser.parse_args()
 
 # assign the desired device.
-device = 'cuda:0'  # or 'cpu'
+device = glob_para.device  # or 'cpu'
 device = torch.device(device)
 
 audio_args = get_arguments()
 audio_model = AVENet(audio_args)
-checkpoint = torch.load("vggsound_avgpool.pth.tar")
+checkpoint = torch.load("vggsound_avgpool.pth.tar", map_location=device)
 audio_model.load_state_dict(checkpoint['model_state_dict'])
-audio_model = audio_model.cuda()
+if device.type != 'cpu':
+    audio_model = audio_model.cuda()
 audio_model.eval()
 
-base_path = '/kaggle/working/'
-test_file = pd.read_pickle('/kaggle/working/pkl/' + args.source_domain + "_train.pkl")
+base_path = glob_para.base_path
+test_file = pd.read_pickle(
+    glob_para.pkl_path + args.source_domain + "_train.pkl")
 
 data1 = []
 class_dict = {}
 for _, line in test_file.iterrows():
-    image = [args.source_domain + '/' + line['video_id'], line['start_frame'], line['stop_frame'], line['start_timestamp'],
+    image = [args.source_domain + '/' + line['video_id'], line['start_frame'],
+             line['stop_frame'], line['start_timestamp'],
              line['stop_timestamp']]
     labels = line['verb_class']
-    data1.append((image[0], image[1], image[2], image[3], image[4], int(labels)))
+    data1.append(
+        (image[0], image[1], image[2], image[3], image[4], int(labels)))
     if line['verb'] not in list(class_dict.keys()):
         class_dict[line['verb']] = line['verb_class']
 
@@ -65,7 +71,7 @@ for i, sample1 in enumerate(data1):
     label1 = sample1[-1]
     start_index = int(np.ceil(sample1[1] / 2))
 
-    audio_path = base_path + 'AudioVGGSound/train/' +sample1[0] + '.wav'
+    audio_path = base_path + 'AudioVGGSound/train/' + sample1[0] + '.wav'
     samples, samplerate = sf.read(audio_path)
 
     duration = len(samples) / samplerate
@@ -94,13 +100,18 @@ for i, sample1 in enumerate(data1):
 
     resamples[resamples > 1.] = 1.
     resamples[resamples < -1.] = -1.
-    frequencies, times, spectrogram = signal.spectrogram(resamples, samplerate, nperseg=512, noverlap=353)
+    frequencies, times, spectrogram = signal.spectrogram(
+        resamples, samplerate, nperseg=512, noverlap=353)
     spectrogram = np.log(spectrogram + 1e-7)
 
     mean = np.mean(spectrogram)
     std = np.std(spectrogram)
     spectrogram = np.divide(spectrogram - mean, std + 1e-9)
-    spectrogram = torch.Tensor(spectrogram).type(torch.FloatTensor).unsqueeze(0).unsqueeze(0).cuda()
+    spectrogram = torch.Tensor(
+        spectrogram).type(torch.FloatTensor).unsqueeze(0).unsqueeze(0)
+    if device.type != 'cpu':
+        spectrogram = torch.Tensor(spectrogram).type(
+            torch.FloatTensor).unsqueeze(0).unsqueeze(0).cuda()
 
     feature_list = []
     with torch.no_grad():
@@ -111,6 +122,4 @@ for i, sample1 in enumerate(data1):
     feature_list = np.mean(feature_list, axis=0)
 
     video_id = sample1[0].split("/")[-1]
-    np.save(save_path+video_id + "_%010d.npy"%start_index, feature_list)
-
-
+    np.save(save_path+video_id + "_%010d.npy" % start_index, feature_list)

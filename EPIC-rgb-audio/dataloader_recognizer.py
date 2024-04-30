@@ -8,12 +8,19 @@ from scipy import signal
 import numpy as np
 import csv
 import random
+import config
+
+glob_para = config.GlobalPara()
+
 
 class EPICDOMAINRecognizer(torch.utils.data.Dataset):
-    def __init__(self, split='train', source_domain='D1', target_domain='D2', modality='rgb', cfg=None, use_audio=True):
-        self.base_path = '/kaggle/working/'
-        source_train_file = pd.read_pickle('/kaggle/working/pkl/'+source_domain+"_"+split+".pkl")
-        target_train_file = pd.read_pickle('/kaggle/working/pkl/'+target_domain+"_"+split+".pkl")
+    def __init__(self, split='train', source_domain='D1', target_domain='D2',
+                 modality='rgb', cfg=None, use_audio=True):
+        self.base_path = glob_para.base_path
+        source_train_file = pd.read_pickle(
+            glob_para.pkl_path+source_domain+"_"+split+".pkl")
+        target_train_file = pd.read_pickle(
+            glob_para.pkl_path+target_domain+"_"+split+".pkl")
 
         self.source_domain = source_domain
         self.target_domain = target_domain
@@ -33,24 +40,28 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
         source_data1 = []
         class_dict = {}
         for _, line in source_train_file.iterrows():
-            image = [source_domain + '/' + line['video_id'], line['start_frame'], line['stop_frame'], line['start_timestamp'],
-                     line['stop_timestamp']]
+            image = [source_domain + '/' + line['video_id'],
+                     line['start_frame'], line['stop_frame'],
+                     line['start_timestamp'], line['stop_timestamp']]
             labels = line['verb_class']
-            source_data1.append((image[0], image[1], image[2], image[3], image[4], int(labels)))
+            source_data1.append((image[0], image[1], image[2], image[3],
+                                 image[4], int(labels)))
             if line['verb'] not in list(class_dict.keys()):
                 class_dict[line['verb']] = line['verb_class']
 
         target_data1 = []
         for _, line in target_train_file.iterrows():
-            image = [target_domain + '/' + line['video_id'], line['start_frame'], line['stop_frame'],
-                     line['start_timestamp'],
-                     line['stop_timestamp']]
+            image = [target_domain + '/' + line['video_id'],
+                     line['start_frame'], line['stop_frame'],
+                     line['start_timestamp'], line['stop_timestamp']]
             # labels = line['verb_class']
             tmp = int(line['start_frame'])
-            labels = np.load("pseudo_labels/%s2%s/" % (source_domain, target_domain) + line[
-                'video_id'] + "_%010d.npy" % tmp)
+            labels = np.load("pseudo_labels/%s2%s/" % (
+                source_domain, target_domain)
+                + line['video_id'] + "_%010d.npy" % tmp)
             labels = np.argmax(labels)
-            target_data1.append((image[0], image[1], image[2], image[3], image[4], int(labels)))
+            target_data1.append((image[0], image[1], image[2], image[3],
+                                 image[4], int(labels)))
 
         self.source_samples = source_data1
         self.target_samples = target_data1
@@ -61,7 +72,8 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
         self.cfg = cfg
 
     def extract_spectrogram(self, sample1):
-        audio_path = self.base_path + 'AudioVGGSound/' + self.split + '/' + sample1[0] + '.wav'
+        audio_path = (self.base_path + 'AudioVGGSound/' + self.split + '/'
+                      + sample1[0] + '.wav')
         samples, samplerate = sf.read(audio_path)
 
         duration = len(samples) / samplerate
@@ -90,7 +102,8 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
 
         resamples[resamples > 1.] = 1.
         resamples[resamples < -1.] = -1.
-        frequencies, times, spectrogram = signal.spectrogram(resamples, samplerate, nperseg=512, noverlap=353)
+        frequencies, times, spectrogram = signal.spectrogram(
+            resamples, samplerate, nperseg=512, noverlap=353)
         spectrogram = np.log(spectrogram + 1e-7)
 
         mean = np.mean(spectrogram)
@@ -106,29 +119,38 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
         return spectrogram
 
     def __getitem__(self, index):
-        video_path = self.base_path +'frames_rgb_flow/rgb/'+self.split + '/'+self.source_samples[index][0]
+        video_path = self.base_path + 'frames_rgb_flow/rgb/' + self.split + \
+            '/' + self.source_samples[index][0]
         index2 = self.target_idx_list.pop(0)
         self.target_idx_list.append(index2)
-        target_video_path = self.base_path +'frames_rgb_flow/rgb/'+self.split + '/'+self.target_samples[index2][0]
+        target_video_path = self.base_path + 'frames_rgb_flow/rgb/' + \
+            self.split + '/'+self.target_samples[index2][0]
 
-        filename_tmpl = self.cfg.data.train.get('filename_tmpl', 'frame_{:010}.jpg')
+        filename_tmpl = self.cfg.data.train.get(
+            'filename_tmpl', 'frame_{:010}.jpg')
         modality = self.cfg.data.train.get('modality', 'RGB')
-        start_index = self.cfg.data.train.get('start_index', int(self.source_samples[index][1]))
+        start_index = self.cfg.data.train.get(
+            'start_index', int(self.source_samples[index][1]))
         data = dict(
             frame_dir=video_path,
-            total_frames=int(self.source_samples[index][2] - self.source_samples[index][1]),
-            # assuming files in ``video_path`` are all named with ``filename_tmpl``  # noqa: E501
+            total_frames=int(
+                self.source_samples[index][2] - self.source_samples[index][1]),
+            # assuming files in ``video_path`` are all named with \
+            # ``filename_tmpl``  # noqa: E501
             label=-1,
             start_index=start_index,
             filename_tmpl=filename_tmpl,
             modality=modality)
         data = self.train_pipeline(data)
 
-        start_index = self.cfg.data.train.get('start_index', int(self.target_samples[index2][1]))
+        start_index = self.cfg.data.train.get(
+            'start_index', int(self.target_samples[index2][1]))
         target_data = dict(
             frame_dir=target_video_path,
-            total_frames=int(self.target_samples[index2][2] - self.target_samples[index2][1]),
-            # assuming files in ``video_path`` are all named with ``filename_tmpl``  # noqa: E501
+            total_frames=int(self.target_samples[index2][2]
+                             - self.target_samples[index2][1]),
+            # assuming files in ``video_path`` are all named with \
+            # ``filename_tmpl``  # noqa: E501
             label=-1,
             start_index=start_index,
             filename_tmpl=filename_tmpl,
@@ -140,7 +162,8 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
         target_label1 = self.target_samples[index2][-1]
 
         spectrogram = self.extract_spectrogram(self.source_samples[index])
-        target_spectrogram = self.extract_spectrogram(self.target_samples[index2])
+        target_spectrogram = self.extract_spectrogram(
+            self.target_samples[index2])
 
         spectrogram = np.stack((spectrogram, target_spectrogram))
         label1 = np.array([label1, target_label1])
@@ -150,10 +173,12 @@ class EPICDOMAINRecognizer(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.source_samples)
 
+
 class EPICDOMAIN(torch.utils.data.Dataset):
-    def __init__(self, split='train', domain='D1', modality='rgb', cfg=None, use_audio=True):
-        self.base_path = '/kaggle/working/'
-        train_file = pd.read_pickle('/kaggle/working/pkl/'+domain+"_"+split+".pkl")
+    def __init__(self, split='train', domain='D1', modality='rgb', cfg=None,
+                 use_audio=True):
+        self.base_path = glob_para.base_path
+        train_file = pd.read_pickle(glob_para.pkl_path+domain+"_"+split+".pkl")
         self.domain = domain
         self.split = split
         self.modality = modality
@@ -171,10 +196,12 @@ class EPICDOMAIN(torch.utils.data.Dataset):
         data1 = []
         class_dict = {}
         for _, line in train_file.iterrows():
-            image = [domain + '/' + line['video_id'], line['start_frame'], line['stop_frame'], line['start_timestamp'],
+            image = [domain + '/' + line['video_id'], line['start_frame'],
+                     line['stop_frame'], line['start_timestamp'],
                      line['stop_timestamp']]
             labels = line['verb_class']
-            data1.append((image[0], image[1], image[2], image[3], image[4], int(labels)))
+            data1.append((image[0], image[1], image[2], image[3], image[4],
+                          int(labels)))
             if line['verb'] not in list(class_dict.keys()):
                 class_dict[line['verb']] = line['verb_class']
 
@@ -183,38 +210,48 @@ class EPICDOMAIN(torch.utils.data.Dataset):
         self.cfg = cfg
 
     def __getitem__(self, index):
-        video_path = self.base_path +'frames_rgb_flow/rgb/'+self.split + '/'+self.samples[index][0]
+        video_path = (self.base_path + 'frames_rgb_flow/rgb/' + self.split +
+                      '/'+self.samples[index][0])
         if self.split == 'train':
-            filename_tmpl = self.cfg.data.train.get('filename_tmpl', 'frame_{:010}.jpg')
+            filename_tmpl = self.cfg.data.train.get(
+                'filename_tmpl', 'frame_{:010}.jpg')
             modality = self.cfg.data.train.get('modality', 'RGB')
-            start_index = self.cfg.data.train.get('start_index', int(self.samples[index][1]))
+            start_index = self.cfg.data.train.get(
+                'start_index', int(self.samples[index][1]))
             data = dict(
                 frame_dir=video_path,
-                total_frames=int(self.samples[index][2] - self.samples[index][1]),
-                # assuming files in ``video_path`` are all named with ``filename_tmpl``  # noqa: E501
+                total_frames=int(
+                    self.samples[index][2] - self.samples[index][1]),
+                # assuming files in ``video_path`` are all named with \
+                #  ``filename_tmpl``  # noqa: E501
                 label=-1,
                 start_index=start_index,
                 filename_tmpl=filename_tmpl,
                 modality=modality)
             data = self.train_pipeline(data)
         else:
-            filename_tmpl = self.cfg.data.val.get('filename_tmpl', 'frame_{:010}.jpg')
+            filename_tmpl = self.cfg.data.val.get(
+                'filename_tmpl', 'frame_{:010}.jpg')
             modality = self.cfg.data.val.get('modality', 'RGB')
-            start_index = self.cfg.data.val.get('start_index', int(self.samples[index][1]))
+            start_index = self.cfg.data.val.get(
+                'start_index', int(self.samples[index][1]))
             data = dict(
                 frame_dir=video_path,
-                total_frames=int(self.samples[index][2] - self.samples[index][1]),
-                # assuming files in ``video_path`` are all named with ``filename_tmpl``  # noqa: E501
+                total_frames=int(
+                    self.samples[index][2] - self.samples[index][1]),
+                # assuming files in ``video_path`` are all named with \
+                # ``filename_tmpl``  # noqa: E501
                 label=-1,
                 start_index=start_index,
                 filename_tmpl=filename_tmpl,
                 modality=modality)
             data = self.val_pipeline(data)
-        #print(data['imgs'].size())
+        # print(data['imgs'].size())
         label1 = self.samples[index][-1]
 
         if self.use_audio is True:
-            audio_path = self.base_path + 'AudioVGGSound/' + self.split + '/' + self.samples[index][0] + '.wav'
+            audio_path = (self.base_path + 'AudioVGGSound/' + self.split +
+                          '/' + self.samples[index][0] + '.wav')
             samples, samplerate = sf.read(audio_path)
 
             duration = len(samples) / samplerate
@@ -243,7 +280,8 @@ class EPICDOMAIN(torch.utils.data.Dataset):
 
             resamples[resamples > 1.] = 1.
             resamples[resamples < -1.] = -1.
-            frequencies, times, spectrogram = signal.spectrogram(resamples, samplerate, nperseg=512, noverlap=353)
+            frequencies, times, spectrogram = signal.spectrogram(
+                resamples, samplerate, nperseg=512, noverlap=353)
             spectrogram = np.log(spectrogram + 1e-7)
 
             mean = np.mean(spectrogram)
