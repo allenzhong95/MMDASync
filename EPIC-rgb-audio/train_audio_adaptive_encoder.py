@@ -16,6 +16,11 @@ from VGGSound.test import get_arguments
 from vit import ViT
 from dataloader_audio_adaptive_encoder import EPICDOMAINClusters, EPICDOMAIN
 from config import config_func
+import config
+
+
+glob_para = config.GlobalPara()
+
 #os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 def train_one_step(model, attention_model, clip, spectrogram, labels, target_label, weights):
     target_clip = clip['imgs'][:, 1].cuda()
@@ -98,7 +103,7 @@ if __name__ == '__main__':
     opts = config_func(args.source_domain, args.target_domain)
 
     config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb.py'
-    checkpoint_file = 'D:/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+    checkpoint_file = glob_para.model_ckpt + 'slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
 
     # assign the desired device.
     device = 'cuda:0' # or 'cpu'

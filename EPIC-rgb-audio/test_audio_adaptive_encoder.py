@@ -107,7 +107,7 @@ for i, sample1 in enumerate(data1):
     data = test_pipeline(data)
     clip = data['imgs'].cuda()
 
-    audio_path = 'D:/AudioVGGSound/test/' + sample1[0] + '.wav'
+    audio_path = glob_para.base_path + 'AudioVGGSound/test/' + sample1[0] + '.wav'
     samples, samplerate = sf.read(audio_path)
 
     duration = len(samples) / samplerate
