@@ -49,7 +49,9 @@ model = init_recognizer(config_file, checkpoint_file, device=device,
 model.cls_head.fc_cls = nn.Linear(2304, 8).cuda()
 cfg = model.cfg
 model = torch.nn.DataParallel(model)
-checkpoint = torch.load("checkpoints/best_%s2%s_2ndStage.pt" % (
+# checkpoint = torch.load("checkpoints/best_%s2%s_2ndStage.pt" % (
+#     args.source_domain, args.target_domain))
+checkpoint = torch.load("checkpoints/best_%s2%s_1stStage.pt" % (
     args.source_domain, args.target_domain))
 model.load_state_dict(checkpoint['state_dict'])
 model.eval()
