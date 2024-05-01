@@ -20,9 +20,12 @@ from vit import ViT
 import pdb
 from config import config_func
 from torch import nn, einsum
+import config
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
+glob_para = config.GlobalPara()
+
 
 class Recognizer(nn.Module):
     def __init__(self):
@@ -200,7 +203,7 @@ if __name__ == '__main__':
     # checkpoint_file = 'ircsn_ig65m_pretrained_bnfrozen_r152_32x2x1_58e_kinetics400_rgb_20200812-9037a758.pth'
 
     config_file = 'configs/recognition/slowfast/slowfast_r101_8x8x1_256e_kinetics400_rgb2.py'
-    checkpoint_file = 'D:/model/slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
+    checkpoint_file = glob_para.model_ckpt + 'slowfast_r101_8x8x1_256e_kinetics400_rgb_20210218-0dd54025.pth'
     # assign the desired device.
     device = 'cuda:0' # or 'cpu'
     device = torch.device(device)
