@@ -15,7 +15,7 @@ class config_func():
 
 
 class GlobalPara():
-    def __init__(self, root_path='D:/', device='cpu') -> None:
+    def __init__(self, root_path='/kaggle/working/', device='cpu') -> None:
         self.device = device
         self.base_path = root_path
         self.pkl_path = root_path + 'pkl/'
