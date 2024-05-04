@@ -4,6 +4,9 @@ Arguments
 '''
 
 
+import torch
+
+
 class config_func():
     def __init__(self, source_domain, target_domain):
         self.lr_1stStage = 1e-4
@@ -15,8 +18,8 @@ class config_func():
 
 
 class GlobalPara():
-    def __init__(self, root_path='/kaggle/working/', device='cpu') -> None:
-        self.device = device
+    def __init__(self, root_path='/kaggle/working/', gpu='cuda:0') -> None:
+        self.device = gpu if torch.cuda.is_available() else 'cpu'
         self.base_path = root_path
         self.pkl_path = root_path + 'pkl/'
         self.model_ckpt = root_path + 'model/'
